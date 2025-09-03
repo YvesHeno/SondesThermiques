@@ -11,6 +11,7 @@ library(tidyverse)
 library(DT)
 library(rnaturalearth)
 library(mapview)
+library(leaflet)
 source("Localisation_sondes.R")
 
 ```
@@ -25,7 +26,7 @@ Hydrométriques de la DREAL
 
 # Localisation des sondes
 
-```{r Localisation,echo=FALSE}
+```{r Localisation,echo=FALSE,fig.width=10}
 temp <- Localisation_sondes()
 sites <- temp[[1]] 
 
@@ -35,8 +36,9 @@ Bretagne <- ne_states(country = "France", returnclass = "sf") %>%
   filter(region=="Bretagne")
 
 mapview(Bretagne,zcol='name',legend=FALSE,label=FALSE,alpha.regions=0.5,popup=FALSE)+
-   mapview(sites,layer.name = "sites hydrométrie",popup=leafpop::popupTable(sites,zcol=c('code_station','libelle_site')),cex=4,col.regions='blue')+
-  mapview(sondes,layer.name = "sondes thermiques",popup=leafpop::popupTable(sondes,zcol=c('code_station','libelle_site')),cex=6,col.regions='red')
+   mapview(sites,layer.name = "sites hydrométrie",popup=leafpop::popupTable(sites,zcol=c('code_station','libelle_station')),cex=4,col.regions='blue',label=sites$libelle_site)+
+  mapview(sondes,layer.name = "sondes thermiques",popup=leafpop::popupTable(sondes,zcol=c('code_station','libelle_station')),cex=6,col.regions='red',label=sondes$libelle_station, 
+   labelOptions = labelOptions(noHide = TRUE, textOnly = TRUE) )
  
   
 
