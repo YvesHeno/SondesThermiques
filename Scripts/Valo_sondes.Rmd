@@ -38,9 +38,32 @@ Bretagne <- ne_states(country = "France", returnclass = "sf") %>%
 mapview(Bretagne,zcol='name',legend=FALSE,label=FALSE,alpha.regions=0.5,popup=FALSE)+
    mapview(sites,layer.name = "sites hydrométrie",popup=leafpop::popupTable(sites,zcol=c('code_station','libelle_station')),cex=4,col.regions='blue',label=sites$libelle_site)+
   mapview(sondes,layer.name = "sondes thermiques",popup=leafpop::popupTable(sondes,zcol=c('code_station','libelle_station')),cex=6,col.regions='red',label=sondes$libelle_station, 
-   labelOptions = labelOptions(noHide = TRUE, textOnly = TRUE) )
+   labelOptions = labelOptions(noHide = TRUE, textOnly = TRUE ))
  
   
 
 ```
 
+
+## Liste des sites hydrométriques
+```{r Listing sites hydro,echo=FALSE}
+sitesl <- select(sites,c(,2)) %>% 
+  sf::st_drop_geometry()  %>% unique()
+datatable(sitesl,options =
+            list(pageLength = 100,
+                  iDisplayLength=10,
+                  bPaginate=FALSE,                  
+                  bLengthChange=FALSE,                       
+                  bFilter=TRUE ,                                   
+                  bInfo=FALSE,
+                  rowid = FALSE,
+                  autoWidth = FALSE,
+                 ordering = TRUE,
+                  scrollX = TRUE,
+                  borders = TRUE,
+                 columnDefs = list(list(className = 'dt-center', targets ="_all"))
+                 ),rownames=FALSE#enlever le numero des lignes
+          )
+
+
+```
