@@ -13,6 +13,7 @@ library(rnaturalearth)
 library(mapview)
 library(leaflet)
 source("Localisation_sondes.R")
+source("proposition_sondes.R")
 
 ```
 
@@ -26,34 +27,54 @@ Hydrométriques de la DREAL
 
 # Localisation des sondes
 
-```{r Localisation,echo=FALSE,fig.width=10}
-temp <- Localisation_sondes()
-sites <- temp[[1]] 
+```{r Localisation,echo=FALSE,fig.width=10,message=FALSE}
+sites <- Localisation_sondes()
+codes_sites_proposes <- read.csv2('../Data/propositiondesites.csv') %>% 
+  select(2) %>% as.data.frame()
 
-sondes <- temp[[2]]
+
 #fonds de carte bretagne
 Bretagne <- ne_states(country = "France", returnclass = "sf") %>% 
   filter(region=="Bretagne")
+stationshydro <- filter(sites,sonde_thermique=='NON')
+sondesthermiques <- filter(sites,sonde_thermique=='OUI')
+sitesproposes <- filter(sites,code_station %in% codes_sites_proposes$code)
 
-mapview(Bretagne,zcol='name',legend=FALSE,label=FALSE,alpha.regions=0.5,popup=FALSE)+
-   mapview(sites,layer.name = "sites hydrométrie",popup=leafpop::popupTable(sites,zcol=c('code_station','libelle_station')),cex=4,col.regions='blue',label=sites$libelle_site)+
-  mapview(sondes,layer.name = "sondes thermiques",popup=leafpop::popupTable(sondes,zcol=c('code_station','libelle_station')),cex=6,col.regions='red',label=sondes$libelle_station, 
-   labelOptions = labelOptions(noHide = TRUE, textOnly = TRUE ))
+#stationspeche
+stationspeches <- readxl::read_xlsx('../Data/Tab_Pêches_prog2026_2027_10_2025.xlsx',sheet=2,col_names = T) %>% 
+  slice(-(1:6)) %>%
+  select(6:9)
+colnames(stationspeches) <- c("code","libelle","X","Y")
+stationspeches <- stationspeches %>% drop_na()
+stationspeches <- stationspeches  %>% 
+  st_as_sf( coords=c("X","Y"),crs=2154) %>% 
+  st_transform(4326) 
+
+
+mapview(Bretagne,zcol='name',legend=FALSE,label=FALSE,alpha.regions=0.1,popup=FALSE)+
+mapview(stationshydro,layer.name = "sites hydrométrie", popup=leafpop::popupTable(stationshydro,zcol=c('code_station','libelle_station')), cex=2,col.regions='lightblue',label=stationshydro$libelle_station, labelOptions = labelOptions(noHide = FALSE, textOnly = TRUE ))+
+  mapview(sondesthermiques,layer.name = "sondes thermiques en place", popup=leafpop::popupTable(sondesthermiques,zcol=c('code_station','libelle_station')), cex=5,col.regions='red', label=sondesthermiques$libelle_station,   labelOptions = labelOptions(noHide = T, textOnly = TRUE ))+
+   mapview(sitesproposes,layer.name = "sites proposes", popup=leafpop::popupTable(sitesproposes,zcol=c('code_station','libelle_station')), cex=4,col.regions='orange', label=sitesproposes$libelle_site,   labelOptions = labelOptions(noHide = F, textOnly = TRUE ))+
+  mapview(stationspeches,layer.name = "Stations pelec", popup=leafpop::popupTable(stationspeches,zcol=c('code','libelle')), cex=3,col.regions='green', label=stationspeches$libelle,   labelOptions = labelOptions(noHide = F, textOnly = TRUE ))
  
-  
+
 
 ```
+## sites proposées mais sans station hydro
+(Donc non retenus)  
+- aër au Croisty  
+- leguer
 
 
 ## Liste des sites hydrométriques
-```{r Listing sites hydro,echo=FALSE}
-sitesl <- select(sites,c(,2)) %>% 
+```{r Listing sites équipés,echo=FALSE}
+sitesl <- select(sites,c(1,2,5)) %>% 
   sf::st_drop_geometry()  %>% unique()
 datatable(sitesl,options =
-            list(pageLength = 100,
+            list(pageLength = 30,
                   iDisplayLength=10,
-                  bPaginate=FALSE,                  
-                  bLengthChange=FALSE,                       
+                  bPaginate=TRUE,                  
+                  bLengthChange=TRUE,                       
                   bFilter=TRUE ,                                   
                   bInfo=FALSE,
                   rowid = FALSE,
