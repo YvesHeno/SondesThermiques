@@ -56,6 +56,7 @@ mapview(stationshydro,layer.name = "sites hydrométrie", popup=leafpop::popupTab
   mapview(sondesthermiques,layer.name = "sondes thermiques en place", popup=leafpop::popupTable(sondesthermiques,zcol=c('code_station','libelle_station')), cex=6,col.regions='red', label=sondesthermiques$libelle_station,   labelOptions = labelOptions(noHide = T, textOnly = TRUE ))+
   mapview(stationspeches,layer.name = "Stations pelec", popup=leafpop::popupTable(stationspeches,zcol=c('code','libelle')), cex=3,col.regions='green', label=stationspeches$libelle,   labelOptions = labelOptions(noHide = F, textOnly = TRUE ))
  
+sondesthermiques <- st_drop_geometry(sondesthermiques)
 
 datatable(sondesthermiques[,3:2],options =
             list(pageLength = 30,
